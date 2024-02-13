@@ -1,0 +1,12 @@
+# vector db folders
+db/
+
+# config files
+*.toml
+
+# pptx
+*.pptx
+
+# large files
+movies.csv
+*.pkl
