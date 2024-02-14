@@ -8,5 +8,4 @@ db/
 *.pptx
 
 # large files
-movies.csv
 *.pkl
