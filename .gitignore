@@ -9,3 +9,4 @@ db/
 
 # large files
 *.pkl
+*.gguf
