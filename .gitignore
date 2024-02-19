@@ -10,3 +10,4 @@ db/
 # large files
 *.pkl
 *.gguf
+glove.6B.100d.txt
