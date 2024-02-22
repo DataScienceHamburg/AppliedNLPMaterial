@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 import seaborn as sns
 import torch
+from torch.nn.functional import cross_entropy
+from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.dummy import DummyClassifier
 # %% YELP Dataset
 # source: https://huggingface.co/datasets/yelp_review_full/viewer/yelp_review_full/train?f%5blabel%5d%5bvalue%5d=0
 
@@ -65,31 +68,28 @@ preds.metrics
 # %%
 np.argmax(preds.predictions, axis=1)
 # %%
-from sklearn.metrics import accuracy_score, confusion_matrix
-# %%
+
+# %% confusion matrix
 true_classes = yelp_ds_dict['test']['label']
 preds_classes = np.argmax(preds.predictions, axis=1)
 conf_mat = confusion_matrix(true_classes, preds_classes)
 sns.heatmap(conf_mat, annot=True)
-# %%
+# %% accuracy
 accuracy_score(true_classes, preds_classes)
-# %%
-from sklearn.dummy import DummyClassifier
+# %% baseline classifier training
 
-# %%
 dummy_clf = DummyClassifier(strategy="most_frequent")
 dummy_clf.fit(yelp_ds_dict['train']['label'], yelp_ds_dict['train']['label'])
 
-# %%
+# %% baseline classifier accuracy
 dummy_clf.score(yelp_ds_dict['test']['label'], yelp_ds_dict['test']['label'])
 
 # %% inspect individual reviews
-from torch.nn.functional import cross_entropy
 model_cpu = model.to('cpu')
-#%%
+#%% Inference
 with torch.no_grad():
     outputs = model_cpu(yelp_ds_dict['test']['input_ids'], yelp_ds_dict['test']['attention_mask'])
-#%%
+#%% Loss calculation
 pred_labels = torch.argmax(outputs.logits, dim=1)
 loss = cross_entropy(outputs.logits, yelp_ds_dict['test']['label'], reduction='none')
 
@@ -104,9 +104,8 @@ sns.lineplot(data=df_individual_reviews, x='label', y='loss')
 # create Token in HuggingFace Account
 
 
-
 #%%
-# %%
+# %% Push the model to HuggingFace Hub
 trainer.create_model_card(model_name = 'distilbert-base-uncased-yelp')
 trainer.push_to_hub(commit_message='Yelp review classification')
 # %% load model from HuggingFace Hub
