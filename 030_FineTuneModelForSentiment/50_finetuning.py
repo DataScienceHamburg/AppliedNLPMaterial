@@ -18,7 +18,7 @@ yelp_hidden_states = joblib.load('model/yelp_hidden_states.joblib')
 
 #%% Model and Tokenizer
 model_name = 'distilbert-base-uncased'
-device = 'cpu'
+device = 'cuda'
 num_labels = 5
 model = AutoModelForSequenceClassification.from_pretrained(model_name, num_labels=num_labels)
 tokenizer = DistilBertTokenizer.from_pretrained(model_name)
@@ -30,10 +30,7 @@ print(train_ds[0]['input_ids'].shape)
 print(eval_ds[0]['input_ids'].shape)
 print(yelp_hidden_states[800]['input_ids'].shape)
 
-#%%
-def change_transformers_dataset_2_right_format(dataset, label_name): 
-    return dataset.map(lambda example: {'label': example[label_name]}, remove_columns=[label_name])
-
+#%% DatasetDict
 yelp_ds_dict = DatasetDict({'train': train_ds, 'test':eval_ds})
 
 #%% Trainer Arguments
@@ -41,7 +38,7 @@ batch_size = 8  # adapt BS to fit into memory
 training_args = TrainingArguments(
     output_dir='./results',          # output directory
     learning_rate=2e-5,              # learning rate
-    num_train_epochs=2,              # total number of training epochs
+    num_train_epochs=20,              # total number of training epochs
     per_device_train_batch_size=batch_size,  # batch size per device during training
     per_device_eval_batch_size=batch_size,   # batch size for evaluation
     warmup_steps=500,                # number of warmup steps for learning rate scheduler
@@ -54,7 +51,9 @@ training_args = TrainingArguments(
     
 )
 #%% Trainer
-trainer = Trainer(model=model, args=training_args, train_dataset=yelp_ds_dict['train'], eval_dataset=yelp_ds_dict['test'])
+trainer = Trainer(model=model, 
+                  args=training_args, 
+                  train_dataset=yelp_ds_dict['train'], eval_dataset=yelp_ds_dict['test'])
 trainer.train()
 
 # %% get losses
@@ -100,7 +99,7 @@ df_individual_reviews
 # %%
 sns.lineplot(data=df_individual_reviews, x='label', y='loss')
 # %% save the model
-# login via Terminal: transformers-cli login
+# login via Terminal: huggingface-cli login
 # create Token in HuggingFace Account
 
 
@@ -108,15 +107,16 @@ sns.lineplot(data=df_individual_reviews, x='label', y='loss')
 # %% Push the model to HuggingFace Hub
 trainer.create_model_card(model_name = 'distilbert-base-uncased-yelp')
 trainer.push_to_hub(commit_message='Yelp review classification')
+
 # %% load model from HuggingFace Hub
 # name was changed online to distilbert-base-uncased-yelp
 from transformers import pipeline
-model_id = 'BertGollnick/distilbert-base-uncased-yelp'
+model_id = 'BertGollnick/distilbert-base-uncased-yelp-new'
 tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
 classifier = pipeline('sentiment-analysis', model=model_id, tokenizer=tokenizer)
 # %%
 # %% visualise scores
-res = classifier('it is  great', return_all_scores=True)[0]
+res = classifier('it is not so great', return_all_scores=True)[0]
 df_res = pd.DataFrame(res)
 sns.barplot(data=df_res, x='label', y='score')
 # %%

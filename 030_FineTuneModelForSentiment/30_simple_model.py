@@ -8,7 +8,7 @@ from transformers import AutoModel, DistilBertTokenizer
 from sklearn.svm import SVC
 from sklearn.linear_model import LogisticRegression
 from sklearn.dummy import DummyClassifier
-
+from sklearn.ensemble import RandomForestClassifier
 # %% YELP Dataset
 # source: https://huggingface.co/datasets/yelp_review_full/viewer/yelp_review_full/train?f%5blabel%5d%5bvalue%5d=0
 yelp = load_dataset('yelp_review_full')
@@ -21,7 +21,7 @@ train_ds = yelp['train'].select(range(1000))
 
 #%% Model and Tokenizer
 model_name = 'distilbert-base-uncased'
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+# device = 'cuda' if torch.cuda.is_available() else 'cpu'
 device = 'cpu'
 model = AutoModel.from_pretrained(model_name).to(device)
 tokenizer = DistilBertTokenizer.from_pretrained(model_name)
@@ -91,4 +91,9 @@ lr_model = LogisticRegression(random_state=42)
 lr_model.fit(X_train, y_train)
 lr_model.score(X_test, y_test)
 
+# %%
+
+rf_model = RandomForestClassifier(random_state=42)
+rf_model.fit(X_train, y_train)
+rf_model.score(X_test, y_test)
 # %%
