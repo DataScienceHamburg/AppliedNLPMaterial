@@ -1,8 +1,27 @@
 #%%
 import torch
 import torchtext.vocab as vocab 
-# %%
-glove = vocab.GloVe(name='6B', dim =100)
+# %% Code Change because of GloVe download issue
+# solution provided by Mitchell Miller
+# glove = vocab.GloVe(name='6B', dim =100)
+from torchtext.vocab import Vectors
+ 
+class newGloVe(Vectors):
+    url = {
+        "42B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.42B.300d.zip", 
+        "840B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.840B.300d.zip",
+        "twitter.27B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.twitter.27B.zip",
+        "6B": "https://huggingface.co/stanfordnlp/glove/resolve/main/glove.6B.zip",
+    }
+ 
+    def __init__(self, name="840B", dim=300, **kwargs) -> None:
+        url = self.url[name]
+        print(f"Downloading from {url}")
+        name = "glove.{}.{}d.txt".format(name, str(dim))
+        super(newGloVe, self).__init__(name, url=url, **kwargs)
+ 
+glove = newGloVe(name='6B', dim=100)
+
 # %% number of words and embeddings
 glove.vectors.shape
 
