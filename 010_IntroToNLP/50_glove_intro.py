@@ -51,11 +51,11 @@ def get_closest_words_from_embedding(word_emb, max_n=5):
 # e.g. King is to Queen like Man is to Woman
 def get_word_analogy(word1, word2, word3, max_n=5):
     # logic w1= king, ...
-    # w1 - w2 + w3 --> w4
+    # w2 - w1 + w3 --> w4
     word1_emb = get_embedding_vector(word1)
     word2_emb = get_embedding_vector(word2)
     word3_emb = get_embedding_vector(word3)
-    word4_emb = word1_emb - word2_emb + word3_emb
+    word4_emb = word2_emb - word1_emb + word3_emb
     analogy = get_closest_words_from_embedding(word4_emb)
     return analogy
 
