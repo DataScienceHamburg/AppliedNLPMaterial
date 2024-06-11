@@ -16,3 +16,4 @@ venv/
 *.txt
 *.pt
 *.zip
+.env
